@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../nunitTestProject1/nunitTestProject1.csproj" Id="e49e6572-53ba-45af-82d5-907a991245f3" />
+  <Project Path="Calculatorapplication.csproj" />
+</Solution>

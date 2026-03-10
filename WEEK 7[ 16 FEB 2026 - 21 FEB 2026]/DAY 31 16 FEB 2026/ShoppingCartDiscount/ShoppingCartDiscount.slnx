@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../DiscountServiceTests.cs/DiscountServiceTests.cs.csproj" />
+  <Project Path="ShoppingCartDiscount.csproj" />
+</Solution>

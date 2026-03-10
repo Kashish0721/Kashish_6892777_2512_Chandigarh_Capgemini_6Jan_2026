@@ -1,0 +1,51 @@
+body{
+    margin:0;
+    font-family:Arial;
+    height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background: linear-gradient(120deg,#89f7fe,#66a6ff);
+}
+
+.card{
+    background:white;
+    padding:30px;
+    width:350px;
+    border-radius:15px;
+    text-align:center;
+
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+h1{
+    margin-bottom:20px;
+}
+
+input{
+    padding:10px;
+    width:70%;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+
+button{
+    padding:10px 15px;
+    margin-top:10px;
+    border:none;
+    border-radius:6px;
+    background:#4CAF50;
+    color:white;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#45a049;
+}
+
+.weather-box{
+    margin-top:20px;
+    font-size:18px;
+}

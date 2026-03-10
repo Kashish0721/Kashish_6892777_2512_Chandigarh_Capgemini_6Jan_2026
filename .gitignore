@@ -1,0 +1,10 @@
+.vs/
+bin/
+obj/
+*.user
+*.suo
+Debug/
+Release/
+node_modules/
+*.log
+Thumbs.db
