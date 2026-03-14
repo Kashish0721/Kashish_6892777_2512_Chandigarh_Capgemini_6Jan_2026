@@ -1,0 +1,32 @@
+﻿@model EmployeeProjectManagement.Models.Employee
+
+<h2>Edit Employee</h2>
+
+<form asp-action="Edit">
+
+    <input type="hidden" asp-for="EmployeeId" />
+
+    <div class="form-group mb-3">
+
+        <label>Name</label>
+
+        <input asp-for="Name" class="form-control" />
+
+    </div>
+
+    <div class="form-group mb-3">
+
+        <label>Department</label>
+
+        <select asp-for="DepartmentId"
+                asp-items="ViewBag.Departments"
+                class="form-control">
+        </select>
+
+    </div>
+
+    <button type="submit" class="btn btn-warning">Update</button>
+
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+
+</form>

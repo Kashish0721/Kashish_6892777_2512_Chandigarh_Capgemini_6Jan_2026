@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Student Portal</title>
+
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <h2 class="logo">🎓 Portal</h2>
+
+            <nav>
+
+                <a href="/Students/Index">Students</a>
+                <a href="/Students/Create">Add Student</a>
+                <a href="/Admin/Index">Admin Panel</a>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- Main Section -->
+        <main class="main">
+
+            <header class="header">
+                <h1>@ViewData["Title"]</h1>
+            </header>
+
+            <section class="content">
+
+                @RenderBody()
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

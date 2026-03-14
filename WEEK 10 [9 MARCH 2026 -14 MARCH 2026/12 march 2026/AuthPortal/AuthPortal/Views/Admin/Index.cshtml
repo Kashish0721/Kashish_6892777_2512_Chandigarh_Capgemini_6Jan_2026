@@ -1,0 +1,42 @@
+﻿@model IEnumerable<AuthPortal.Models.Student>
+
+<div class="card">
+
+    <h2>Students</h2>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Course</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Email</td>
+                    <td>@item.Course</td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+    <br>
+
+    <a class="btn btn-primary" href="/Admin/Index">
+        Go to Admin Panel
+    </a>
+
+</div>

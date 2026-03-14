@@ -1,0 +1,106 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* Focus styling */
+.btn:focus, .btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.15rem rgba(37,140,251,0.3);
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+    /* Clean light background */
+    background: #f5f7fb;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Headings */
+
+h2 {
+    color: #1f2937;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Navbar improvement */
+
+.navbar {
+    background: #1f2937 !important;
+}
+
+.navbar-brand,
+.nav-link {
+    color: white !important;
+}
+
+    .nav-link:hover {
+        color: #38bdf8 !important;
+    }
+
+/* Forms */
+
+form {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+/* Tables */
+
+table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+/* Cards (Dashboard) */
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+/* Buttons */
+
+.btn-success {
+    background: #22c55e;
+    border: none;
+}
+
+.btn-warning {
+    background: #f59e0b;
+    border: none;
+}
+
+.btn-danger {
+    background: #ef4444;
+    border: none;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    border: none;
+}
+
+/* Footer */
+
+.footer {
+    background: #f1f5f9;
+}

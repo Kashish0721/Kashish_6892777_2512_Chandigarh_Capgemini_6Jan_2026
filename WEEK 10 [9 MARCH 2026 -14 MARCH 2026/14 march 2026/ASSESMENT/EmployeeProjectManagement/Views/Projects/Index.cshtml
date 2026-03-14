@@ -1,0 +1,41 @@
+﻿@model IEnumerable<EmployeeProjectManagement.Models.Project>
+
+<h2>Projects</h2>
+
+<a class="btn btn-primary mb-3" asp-action="Create">Add Project</a>
+
+<table class="table table-striped">
+
+    <thead>
+        <tr>
+            <th>Project Title</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>@item.Title</td>
+
+                <td>
+
+                    <a asp-action="Edit"
+                       asp-route-id="@item.ProjectId"
+                       class="btn btn-warning btn-sm">Edit</a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@item.ProjectId"
+                       class="btn btn-danger btn-sm">Delete</a>
+
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+
+</table>

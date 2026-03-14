@@ -1,0 +1,38 @@
+﻿@model IEnumerable<EmployeeProjectManagement.Models.Project>
+
+<h2 class="mb-4">Project Dashboard</h2>
+
+<div class="row">
+
+    @foreach (var project in Model)
+    {
+        <div class="col-md-4">
+
+            <div class="card mb-4 shadow">
+
+                <div class="card-body">
+
+                    <h4 class="card-title">@project.Title</h4>
+
+                    <h6>Employees:</h6>
+
+                    <ul>
+
+                        @foreach (var emp in project.EmployeeProjects)
+                        {
+                            <li>
+                                @emp.Employee.Name
+                                ( @emp.Employee.Department.Name )
+                            </li>
+                        }
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+</div>
