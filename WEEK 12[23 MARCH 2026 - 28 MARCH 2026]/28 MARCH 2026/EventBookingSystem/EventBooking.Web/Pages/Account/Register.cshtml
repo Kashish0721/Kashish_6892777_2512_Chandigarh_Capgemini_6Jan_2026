@@ -1,0 +1,144 @@
+@page
+@model EventBooking.Web.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="auth-wrapper">
+    <div class="auth-card" style="max-width:500px">
+        <div class="auth-logo">
+            <i class="bi bi-person-plus-fill"></i>
+        </div>
+        <h4 class="text-center fw-800 mb-1">Create Account</h4>
+        <p class="text-center text-muted small mb-4">Join EventHub and start booking today</p>
+
+        <form id="registerForm" novalidate>
+            <div class="row g-3">
+
+                <div class="col-12">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" id="fullName" class="form-control" required>
+                    <div class="invalid-feedback">Full name is required.</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Email *</label>
+                    <input type="email" id="email" class="form-control" required>
+                    <div class="invalid-feedback">Enter valid email.</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Phone</label>
+                    <input type="text" id="phone" class="form-control">
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Password *</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Confirm Password *</label>
+                    <input type="password" id="confirmPassword" class="form-control" required>
+                </div>
+
+            </div>
+
+            <div id="regError" class="alert alert-danger mt-3 d-none"></div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-4">
+                Create Account
+            </button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a asp-page="/Account/Login">Already have account? Login</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+
+var API_BASE_URL = "@Model.ApiBaseUrl";
+
+
+document.getElementById("registerForm").addEventListener("submit", function (e) {
+
+    e.preventDefault();
+
+    var fullName = document.getElementById("fullName");
+    var email = document.getElementById("email");
+    var phone = document.getElementById("phone");
+    var password = document.getElementById("password");
+    var confirm = document.getElementById("confirmPassword");
+    var errBox = document.getElementById("regError");
+
+    var valid = true;
+
+    // remove errors
+    fullName.classList.remove("is-invalid");
+    email.classList.remove("is-invalid");
+    password.classList.remove("is-invalid");
+    confirm.classList.remove("is-invalid");
+
+    errBox.classList.add("d-none");
+
+    // validations
+    if (fullName.value === "") {
+        fullName.classList.add("is-invalid");
+        valid = false;
+    }
+
+    if (email.value === "" || !isValidEmail(email.value)) {
+        email.classList.add("is-invalid");
+        valid = false;
+    }
+
+    if (password.value === "" || password.value.length < 6) {
+        password.classList.add("is-invalid");
+        valid = false;
+    }
+
+    if (confirm.value !== password.value) {
+        confirm.classList.add("is-invalid");
+        valid = false;
+    }
+
+    if (!valid) return;
+
+    fetch(API_BASE_URL + "/api/auth/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            fullName: fullName.value,
+            email: email.value,
+            password: password.value,
+            phoneNumber: phone.value
+        })
+    })
+    .then(function(res) {
+        return res.json();
+    })
+    .then(function(data) {
+
+        if (data && data.token) {
+            alert("Registered Successfully");
+            window.location.href = "/Account/Login";
+        } else {
+            errBox.textContent = data.message || "Registration failed";
+            errBox.classList.remove("d-none");
+        }
+
+    })
+    .catch(function() {
+        errBox.textContent = "Server error";
+        errBox.classList.remove("d-none");
+    });
+
+});
+
+</script>
+}

@@ -1,0 +1,28 @@
+﻿@model ProductManagementMVC.Models.Student
+
+<h2>Student Registration</h2>
+
+@if (ViewBag.message != null)
+{
+    <p style="color:green">@ViewBag.message</p>
+}
+
+<form method="post">
+
+    <div>
+        <label>Name</label>
+        <input asp-for="Name" />
+    </div>
+
+    <br>
+
+    <div>
+        <label>Age</label>
+        <input asp-for="Age" />
+    </div>
+
+    <br>
+
+    <button type="submit">Submit</button>
+
+</form>

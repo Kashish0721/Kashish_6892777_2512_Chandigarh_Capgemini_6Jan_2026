@@ -1,0 +1,169 @@
+@page
+@model EventBooking.Web.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_Layout";
+}
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <i class="bi bi-calendar-event-fill"></i>
+        </div>
+        <h4 class="text-center fw-800 mb-1">Welcome back</h4>
+        <p class="text-center text-muted small mb-4">Sign in to your EventHub account</p>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger py-2 small">
+                <i class="bi bi-exclamation-circle me-1"></i>@TempData["Error"]
+            </div>
+        }
+        @if (Request.Query["expired"] == "1")
+        {
+            <div class="alert alert-warning py-2 small">
+                <i class="bi bi-clock me-1"></i>Your session expired. Please log in again.
+            </div>
+        }
+
+        <form id="loginForm" novalidate>
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
+                    <input type="email" id="email" class="form-control border-start-0"
+                           placeholder="you@example.com" required autocomplete="email">
+                    <div class="invalid-feedback">Please enter a valid email.</div>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-lock text-muted"></i></span>
+                    <input type="password" id="password" class="form-control border-start-0"
+                           placeholder="Your password" required autocomplete="current-password">
+                    <button class="input-group-text bg-white border-start-0" type="button"
+                            onclick="togglePassword()">
+                        <i class="bi bi-eye" id="eyeIcon"></i>
+                    </button>
+                    <div class="invalid-feedback">Password is required.</div>
+                </div>
+            </div>
+
+            <div id="loginError" class="alert alert-danger py-2 small d-none"></div>
+
+            <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3" id="loginBtn">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+        </form>
+
+        <div class="text-center">
+            <span class="text-muted small">Don't have an account?</span>
+            <a asp-page="/Account/Register" class="small fw-semibold ms-1"
+               style="color:var(--primary)">Create one free</a>
+        </div>
+
+        <hr class="my-4">
+        <div class="p-3 rounded-3 small" style="background:#f8fafc;border:1px solid #e2e8f0">
+            <div class="fw-semibold mb-2 text-muted">Demo Credentials</div>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div><i class="bi bi-shield-check text-success me-1"></i><strong>Admin</strong></div>
+                    <div class="text-muted">admin@eventbooking.com</div>
+                    <div class="text-muted">Admin@123</div>
+                </div>
+                <div>
+                    <div><i class="bi bi-person text-primary me-1"></i><strong>User</strong></div>
+                    <div class="text-muted">john@@example.com</div>
+                    <div class="text-muted">User@@123</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const API_BASE_URL = '@Model.ApiBaseUrl';
+const RETURN_URL = '@Model.ReturnUrl';
+
+
+var emailRegex = new RegExp("^[^@@]+@@[^@@]+\\.[^@@]+$");
+
+function togglePassword() {
+    var input = document.getElementById('password');
+    var icon  = document.getElementById('eyeIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    var email    = document.getElementById('email');
+    var password = document.getElementById('password');
+    var errBox   = document.getElementById('loginError');
+    var valid    = true;
+
+    email.classList.remove('is-invalid');
+    password.classList.remove('is-invalid');
+    errBox.classList.add('d-none');
+
+    if (!email.value || !emailRegex.test(email.value)) {
+        email.classList.add('is-invalid'); valid = false;
+    }
+    if (!password.value) {
+        password.classList.add('is-invalid'); valid = false;
+    }
+    if (!valid) return;
+
+    var btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing in\u2026';
+
+    try {
+        var res = await fetch(API_BASE_URL + '/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email.value, password: password.value })
+        });
+
+        var data = await res.json();
+
+        if (res.ok) {
+            sessionStorage.setItem('jwt_token', data.token);
+            sessionStorage.setItem('auth_user', JSON.stringify(data));
+
+            await fetch('/Account/LoginServer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token: data.token,
+                    fullName: data.fullName,
+                    email: data.email,
+                    role: data.role,
+                    userId: data.userId
+                })
+            });
+
+            window.location.href = RETURN_URL || '/Events/Index';
+        } else {
+            errBox.textContent = data.message || 'Invalid email or password.';
+            errBox.classList.remove('d-none');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';
+        }
+    } catch (err) {
+        errBox.textContent = 'Network error. Ensure the API is running.';
+        errBox.classList.remove('d-none');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';
+    }
+});
+</script>
+}

@@ -1,0 +1,188 @@
+@page
+@model EventBooking.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- ── HERO ─────────────────────────────────────────────────────────────── -->
+<section class="hero">
+    <div class="container hero-content">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <div class="badge-pill">
+                    <i class="bi bi-stars"></i> India's Premier Event Platform
+                </div>
+                <h1 class="mb-3">
+                    Discover &amp; Book<br />
+                    <span style="color: var(--primary-light)">Unforgettable Events</span>
+                </h1>
+                <p class="lead mb-4" style="color: rgba(255,255,255,0.7); max-width: 520px;">
+                    From tech conferences to live concerts — find events that excite you,
+                    book seats instantly, and manage everything in one place.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a asp-page="/Events/Index" class="btn btn-accent px-4 py-2 fw-bold">
+                        <i class="bi bi-grid-3x3-gap me-2"></i>Browse All Events
+                    </a>
+                    @if (!User.Identity!.IsAuthenticated)
+                    {
+                        <a asp-page="/Account/Register" class="btn btn-outline-light px-4 py-2">
+                            <i class="bi bi-person-plus me-2"></i>Get Started Free
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-flex justify-content-end">
+                <div style="font-size: 10rem; opacity: 0.12; line-height: 1;">🎪</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── STATS ─────────────────────────────────────────────────────────────── -->
+<section class="py-5 bg-white border-bottom">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-6 col-md-3">
+                <div class="fw-800" style="font-size:2.2rem; font-weight:800; color:var(--primary)">500+</div>
+                <div class="text-muted small">Events Hosted</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div style="font-size:2.2rem; font-weight:800; color:var(--accent-dark)">50K+</div>
+                <div class="text-muted small">Tickets Booked</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div style="font-size:2.2rem; font-weight:800; color:var(--success)">20+</div>
+                <div class="text-muted small">Cities Covered</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div style="font-size:2.2rem; font-weight:800; color:var(--danger)">4.9★</div>
+                <div class="text-muted small">Avg. Rating</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── FEATURED EVENTS (loaded via JS) ───────────────────────────────────── -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h2 class="section-heading mb-1">Upcoming Events</h2>
+                <p class="text-muted mb-0">Don't miss out — seats fill up fast</p>
+            </div>
+            <a asp-page="/Events/Index" class="btn btn-outline-primary btn-sm">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div id="featuredEvents" class="row g-4">
+            <!-- Loaded by JS -->
+            <div class="col-12 text-center py-5">
+                <div class="spinner-custom mx-auto mb-3"></div>
+                <p class="text-muted">Loading events…</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────────────────────────── -->
+<section class="py-5 bg-white border-top">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-heading">How It Works</h2>
+            <p class="text-muted">Three simple steps to your next great experience</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            @foreach (var step in new[] {
+                ("bi-search", "var(--primary)", "1. Discover", "Browse hundreds of events by category, date, or location."),
+                ("bi-ticket-perforated", "var(--accent-dark)", "2. Book", "Select your seats and confirm instantly with secure JWT-backed authentication."),
+                ("bi-calendar2-check", "var(--success)", "3. Attend", "Receive your confirmation code and enjoy the event!")
+            })
+            {
+                <div class="col-md-4">
+                    <div class="text-center p-4">
+                        <div class="mx-auto mb-3" style="width:64px;height:64px;border-radius:18px;
+                             background:@step.Item2; display:flex;align-items:center;
+                             justify-content:center; font-size:1.8rem; color:#fff;
+                             box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+                            <i class="bi @step.Item1"></i>
+                        </div>
+                        <h5 class="fw-700" style="font-weight:700">@step.Item3</h5>
+                        <p class="text-muted mb-0">@step.Item4</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+const API_BASE_URL = '@Model.ApiBaseUrl';
+
+async function loadFeaturedEvents() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/events?pageSize=4`);
+        const data = await res.json();
+        const container = document.getElementById('featuredEvents');
+
+        if (!data.data || data.data.length === 0) {
+            container.innerHTML = '<div class="col-12 text-center py-5 text-muted">No events found.</div>';
+            return;
+        }
+
+        container.innerHTML = data.data.map(e => buildEventCard(e)).join('');
+    } catch (err) {
+        document.getElementById('featuredEvents').innerHTML =
+            '<div class="col-12 text-center py-5 text-muted"><i class="bi bi-wifi-off fs-2 d-block mb-2"></i>Could not load events. Make sure the API is running.</div>';
+    }
+}
+
+function buildEventCard(e) {
+    const remaining = e.availableSeats - e.bookedSeats;
+    const pct = e.availableSeats > 0 ? Math.round((remaining / e.availableSeats) * 100) : 0;
+    const barCls = pct < 25 ? 'low' : '';
+    const price = e.ticketPrice === 0 ? '<span class="price-tag free">FREE</span>'
+        : `<span class="price-tag">₹${Number(e.ticketPrice).toLocaleString('en-IN')}</span>`;
+    const catMap = { Technology:'badge-tech', Music:'badge-music', Sports:'badge-sports', Business:'badge-business' };
+    const catCls = catMap[e.category] || 'badge-general';
+    const imgFallback = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800';
+
+    return `
+    <div class="col-sm-6 col-lg-3">
+      <div class="event-card card">
+        <div class="card-img-wrapper">
+          <img src="${e.imageUrl || imgFallback}" class="card-img-top" alt="${e.title}"
+               onerror="this.src='${imgFallback}'">
+          <span class="event-category-badge ${catCls}">${e.category}</span>
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h6 class="card-title">${e.title}</h6>
+          <div class="event-meta mb-2">
+            <div><i class="bi bi-calendar3"></i> ${new Date(e.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>
+            <div class="mt-1"><i class="bi bi-geo-alt"></i> ${e.location.split(',').slice(-2).join(',').trim()}</div>
+          </div>
+          <div class="mt-auto">
+            <div class="d-flex justify-content-between mb-1">
+              <small class="text-muted">${remaining} seats left</small>
+              <small class="text-muted">${pct}%</small>
+            </div>
+            <div class="seats-bar mb-3">
+              <div class="seats-bar-fill ${barCls}" style="width:${pct}%"></div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+              ${price}
+              <a href="/Events/Details?id=${e.id}" class="btn btn-sm btn-primary-custom">
+                Book Now
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+loadFeaturedEvents();
+</script>
+}

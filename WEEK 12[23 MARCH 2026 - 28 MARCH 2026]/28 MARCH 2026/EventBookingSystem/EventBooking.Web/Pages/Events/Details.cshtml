@@ -1,0 +1,239 @@
+@page
+@model EventBooking.Web.Pages.Events.EventDetailsModel
+@{
+    ViewData["Title"] = "Event Details";
+}
+
+<div class="container py-5">
+    <a asp-page="/Events/Index" class="btn btn-outline-secondary btn-sm mb-4">
+        <i class="bi bi-arrow-left me-1"></i>Back to Events
+    </a>
+
+    <div id="eventDetail">
+        <div class="text-center py-5">
+            <div class="spinner-custom mx-auto mb-3"></div>
+            <p class="text-muted">Loading event…</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const API_BASE_URL = '@Model.ApiBaseUrl';
+const IS_AUTHENTICATED = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+const EVENT_ID = @(Model.EventId);
+
+async function loadEvent() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/events/${EVENT_ID}`);
+        if (!res.ok) throw new Error('Event not found');
+        const e = await res.json();
+        renderEvent(e);
+    } catch(err) {
+        document.getElementById('eventDetail').innerHTML =
+            `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>
+             Could not load event. It may have been removed or the API is unavailable.</div>`;
+    }
+}
+
+function renderEvent(e) {
+    const remaining = e.availableSeats - e.bookedSeats;
+    const pct = e.availableSeats > 0 ? Math.round((remaining / e.availableSeats) * 100) : 0;
+    const barCls = pct < 25 ? 'low' : '';
+    const catMap = { Technology:'badge-tech', Music:'badge-music', Sports:'badge-sports', Business:'badge-business' };
+    const catCls = catMap[e.category] || 'badge-general';
+    const dateStr = new Date(e.date).toLocaleDateString('en-IN',
+        { weekday:'long', day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const imgFallback = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800';
+    const isSoldOut = remaining <= 0;
+    const price = e.ticketPrice === 0 ? 'FREE' : `₹${Number(e.ticketPrice).toLocaleString('en-IN')}`;
+
+    document.getElementById('eventDetail').innerHTML = `
+    <div class="row g-5">
+      <!-- Left: Event Info -->
+      <div class="col-lg-7">
+        <div style="border-radius:1rem;overflow:hidden;box-shadow:var(--shadow-lg)" class="mb-4">
+          <img src="${e.imageUrl || imgFallback}" alt="${e.title}"
+               style="width:100%;height:380px;object-fit:cover"
+               onerror="this.src='${imgFallback}'">
+        </div>
+        <span class="event-category-badge ${catCls} position-static d-inline-block mb-3">${e.category}</span>
+        <h1 class="fw-800 mb-3" style="font-weight:800;font-size:2rem">${e.title}</h1>
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0">
+              <i class="bi bi-calendar3 fs-4" style="color:var(--primary)"></i>
+              <div><div class="fw-semibold small">Date & Time</div><div class="text-muted small">${dateStr}</div></div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0">
+              <i class="bi bi-geo-alt fs-4" style="color:var(--primary)"></i>
+              <div><div class="fw-semibold small">Venue</div><div class="text-muted small">${e.location}</div></div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0">
+              <i class="bi bi-person-badge fs-4" style="color:var(--primary)"></i>
+              <div><div class="fw-semibold small">Organizer</div><div class="text-muted small">${e.organizerName || 'EventHub'}</div></div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0">
+              <i class="bi bi-people fs-4" style="color:var(--primary)"></i>
+              <div><div class="fw-semibold small">Capacity</div><div class="text-muted small">${e.availableSeats} total seats</div></div>
+            </div>
+          </div>
+        </div>
+        <h5 class="fw-700">About this event</h5>
+        <p class="text-muted">${e.description}</p>
+      </div>
+
+      <!-- Right: Booking Card -->
+      <div class="col-lg-5">
+        <div class="booking-form-card sticky-top" style="top:90px">
+          <div class="booking-form-header">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="text-white-50 small mb-1">Ticket Price</div>
+                <div style="font-size:1.8rem;font-weight:800">${price}</div>
+                <div class="text-white-50 small">per seat</div>
+              </div>
+              <div class="text-end">
+                <div class="text-white-50 small mb-1">Availability</div>
+                <div class="fw-700 ${remaining < 20 ? 'text-warning' : 'text-white'}">${remaining} left</div>
+              </div>
+            </div>
+            <div class="seats-bar mt-3" style="height:6px">
+              <div class="seats-bar-fill ${barCls}" style="width:${pct}%"></div>
+            </div>
+          </div>
+          <div class="p-4">
+            ${isSoldOut ? '<div class="alert alert-danger text-center fw-semibold">😔 This event is sold out</div>' :
+              IS_AUTHENTICATED ? buildBookingForm(e) : buildLoginPrompt()}
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+    if (!isSoldOut && IS_AUTHENTICATED) {
+        setupBookingForm(e);
+    }
+}
+
+function buildBookingForm(e) {
+    return `
+    <form id="bookingForm" novalidate>
+      <div class="mb-3">
+        <label class="form-label">Number of Seats</label>
+        <input type="number" id="seatsInput" class="form-control" min="1" max="20" value="1" required>
+        <div class="invalid-feedback">Please enter a valid number of seats (1–20).</div>
+        <div class="form-text">Max 20 seats per booking</div>
+      </div>
+      <div class="mb-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0" id="priceSummary">
+        <div class="d-flex justify-content-between">
+          <span class="text-muted">1 × ₹${Number(e.ticketPrice).toLocaleString('en-IN')}</span>
+          <span class="fw-semibold" id="totalPrice">₹${Number(e.ticketPrice).toLocaleString('en-IN')}</span>
+        </div>
+        <hr class="my-2">
+        <div class="d-flex justify-content-between fw-700">
+          <span>Total</span>
+          <span id="grandTotal" style="color:var(--primary)">₹${Number(e.ticketPrice).toLocaleString('en-IN')}</span>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary-custom w-100 py-2" id="bookBtn">
+        <i class="bi bi-ticket-perforated me-2"></i>Confirm Booking
+      </button>
+    </form>
+    <div id="bookingResult" class="mt-3"></div>`;
+}
+
+function buildLoginPrompt() {
+    return `
+    <div class="text-center py-3">
+      <div style="font-size:3rem">🔐</div>
+      <p class="text-muted mt-2 mb-3">Please login to book tickets for this event.</p>
+      <a href="/Account/Login?returnUrl=/Events/Details?id=${EVENT_ID}" class="btn btn-primary-custom w-100 mb-2">
+        <i class="bi bi-box-arrow-in-right me-2"></i>Login to Book
+      </a>
+      <a href="/Account/Register" class="btn btn-outline-secondary w-100">
+        <i class="bi bi-person-plus me-2"></i>Create Account
+      </a>
+    </div>`;
+}
+
+function setupBookingForm(e) {
+    const seatsInput = document.getElementById('seatsInput');
+    if (!seatsInput) return;
+
+    seatsInput.addEventListener('input', () => {
+        const seats = parseInt(seatsInput.value) || 0;
+        const total = seats * e.ticketPrice;
+        document.getElementById('totalPrice').textContent =
+            `${seats} × ₹${Number(e.ticketPrice).toLocaleString('en-IN')}`;
+        document.getElementById('grandTotal').textContent =
+            `₹${total.toLocaleString('en-IN')}`;
+    });
+
+    document.getElementById('bookingForm').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const seats = parseInt(seatsInput.value);
+        const remaining = e.availableSeats - e.bookedSeats;
+
+        // ── Client-side validation ────────────────────────────────────
+        if (!seats || seats < 1 || seats > 20) {
+            seatsInput.classList.add('is-invalid');
+            return;
+        }
+        if (seats > remaining) {
+            seatsInput.classList.add('is-invalid');
+            seatsInput.nextElementSibling.textContent = `Only ${remaining} seat(s) available.`;
+            return;
+        }
+        seatsInput.classList.remove('is-invalid');
+        seatsInput.classList.add('is-valid');
+
+        const btn = document.getElementById('bookBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Booking…';
+
+        try {
+            const token = sessionStorage.getItem('jwt_token');
+            const res = await fetch(`${API_BASE_URL}/api/bookings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ eventId: EVENT_ID, seatsBooked: seats })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                document.getElementById('bookingResult').innerHTML = `
+                <div class="alert alert-success border-0 rounded-3">
+                  <div class="fw-700 mb-1">🎉 Booking Confirmed!</div>
+                  <div class="small">Confirmation: <span class="confirmation-code">${data.confirmationCode}</span></div>
+                  <div class="small text-muted mt-1">${seats} seat(s) · ₹${Number(data.totalAmount).toLocaleString('en-IN')} total</div>
+                  <a href="/Bookings/MyBookings" class="btn btn-sm btn-success mt-2">View My Bookings</a>
+                </div>`;
+                document.getElementById('bookingForm').style.display = 'none';
+            } else {
+                document.getElementById('bookingResult').innerHTML =
+                    `<div class="alert alert-danger border-0">${data.message || 'Booking failed. Please try again.'}</div>`;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-ticket-perforated me-2"></i>Confirm Booking';
+            }
+        } catch(err) {
+            document.getElementById('bookingResult').innerHTML =
+                `<div class="alert alert-danger border-0">Network error. Please check your connection.</div>`;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-ticket-perforated me-2"></i>Confirm Booking';
+        }
+    });
+}
+
+loadEvent();
+</script>
+}

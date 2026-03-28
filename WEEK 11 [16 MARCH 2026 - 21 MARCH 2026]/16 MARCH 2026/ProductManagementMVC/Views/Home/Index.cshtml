@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<style>
+
+    body{
+        font-family: Arial;
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        height:100vh;
+    }
+
+    .container{
+        text-align:center;
+        margin-top:120px;
+    }
+
+    .card{
+        background:white;
+        padding:40px;
+        border-radius:12px;
+        width:380px;
+        margin:auto;
+        box-shadow:0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .btn{
+        display:block;
+        padding:12px;
+        margin:15px;
+        background:#007bff;
+        color:white;
+        text-decoration:none;
+        border-radius:6px;
+        font-size:18px;
+    }
+
+    .btn:hover{
+        background:#0056b3;
+    }
+
+</style>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>🚀 Management Portal</h2>
+
+        <p>Select a module</p>
+
+        <a class="btn" href="/Product/Create">➕ Add Product</a>
+
+        <a class="btn" href="/Product/Index">Product Management</a>
+
+    </div>
+
+</div>

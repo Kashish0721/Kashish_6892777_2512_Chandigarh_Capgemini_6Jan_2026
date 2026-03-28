@@ -1,0 +1,130 @@
+@page
+@model EventBooking.Web.Pages.Bookings.AllBookingsModel
+@{
+    ViewData["Title"] = "All Bookings — Admin";
+}
+
+<div class="py-4 border-bottom bg-white mb-4">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="section-heading mb-1">
+                <i class="bi bi-shield-check me-2" style="color:var(--primary)"></i>All Bookings
+            </h1>
+            <p class="text-muted mb-0">Admin view — all system bookings</p>
+        </div>
+        <a asp-page="/Events/Create" class="btn btn-primary-custom">
+            <i class="bi bi-plus-circle me-2"></i>Add Event
+        </a>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <!-- Search bar -->
+    <div class="filter-bar mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <input type="text" id="adminSearch" class="form-control" placeholder="Event, user, code…">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select id="statusFilter" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="allBookingsContainer">
+        <div class="text-center py-5">
+            <div class="spinner-custom mx-auto mb-3"></div>
+            <p class="text-muted">Loading all bookings…</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const API_BASE_URL = '@Model.ApiBaseUrl';
+let allBookings = [];
+
+async function loadAllBookings() {
+    try {
+        const token = sessionStorage.getItem('jwt_token');
+        const res = await fetch(`${API_BASE_URL}/api/bookings/all`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        allBookings = await res.json();
+        renderTable(allBookings);
+    } catch {
+        document.getElementById('allBookingsContainer').innerHTML =
+            `<div class="alert alert-danger">Failed to load bookings. Ensure you are logged in as Admin.</div>`;
+    }
+}
+
+function renderTable(bookings) {
+    const el = document.getElementById('allBookingsContainer');
+    if (bookings.length === 0) {
+        el.innerHTML = '<div class="text-center py-5 text-muted">No bookings found.</div>';
+        return;
+    }
+
+    const rows = bookings.map(b => {
+        const sc = b.status === 'Confirmed' ? 'status-confirmed' : 'status-cancelled';
+        const dateStr = new Date(b.bookingDate).toLocaleDateString('en-IN',
+            { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        return `
+        <tr>
+          <td><span class="confirmation-code">${b.confirmationCode}</span></td>
+          <td class="fw-600">${b.eventTitle}</td>
+          <td>${b.userName}</td>
+          <td class="text-center">${b.seatsBooked}</td>
+          <td class="fw-700" style="color:var(--primary)">₹${Number(b.totalAmount).toLocaleString('en-IN')}</td>
+          <td>${dateStr}</td>
+          <td><span class="status-badge ${sc}">${b.status}</span></td>
+        </tr>`;
+    }).join('');
+
+    el.innerHTML = `
+    <div class="mb-2 text-muted small">Showing ${bookings.length} booking(s)</div>
+    <div class="booking-table">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Confirmation</th>
+            <th>Event</th>
+            <th>User</th>
+            <th class="text-center">Seats</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function applyFilters() {
+    const q = document.getElementById('adminSearch').value.toLowerCase();
+    const s = document.getElementById('statusFilter').value;
+    const filtered = allBookings.filter(b => {
+        const matchQ = !q ||
+            b.eventTitle.toLowerCase().includes(q) ||
+            b.userName.toLowerCase().includes(q) ||
+            b.confirmationCode.toLowerCase().includes(q);
+        const matchS = !s || b.status === s;
+        return matchQ && matchS;
+    });
+    renderTable(filtered);
+}
+
+document.getElementById('adminSearch').addEventListener('input', applyFilters);
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+
+loadAllBookings();
+</script>
+}

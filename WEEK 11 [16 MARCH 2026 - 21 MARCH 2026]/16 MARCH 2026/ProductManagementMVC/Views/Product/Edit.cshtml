@@ -1,0 +1,21 @@
+﻿@model ProductManagementMVC.Models.Product
+
+<h2>Edit Product</h2>
+
+<form method="post">
+
+    <input type="hidden" asp-for="Id" />
+
+    <label>Name</label>
+    <input asp-for="Name" />
+
+    <br><br>
+
+    <label>Price</label>
+    <input asp-for="Price" />
+
+    <br><br>
+
+    <button type="submit">Update</button>
+
+</form>

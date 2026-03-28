@@ -1,0 +1,18 @@
+﻿@model StudentManagementMVC.Models.Student
+
+<h2>Student Registration</h2>
+
+<form method="post">
+
+    <input asp-for="Name" class="form-control mb-2" placeholder="Enter Name" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+
+    <input asp-for="Age" class="form-control mb-2" placeholder="Enter Age" />
+    <span asp-validation-for="Age" class="text-danger"></span>
+
+    <input asp-for="Email" class="form-control mb-2" placeholder="Enter Email" />
+    <span asp-validation-for="Email" class="text-danger"></span>
+
+    <button class="btn btn-success">Register</button>
+
+</form>

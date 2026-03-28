@@ -1,0 +1,17 @@
+﻿@model List<EmployeeManagementMVC.Models.Employee>
+
+<h2>All Employees</h2>
+
+<table class="table table-bordered">
+
+    @foreach (var e in Model)
+    {
+        <tr>
+            <td>@e.Name</td>
+            <td>@e.Age</td>
+            <td>@e.Email</td>
+            <td>@e.Department</td>
+        </tr>
+    }
+
+</table>

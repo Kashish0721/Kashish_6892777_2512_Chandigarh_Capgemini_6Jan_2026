@@ -1,0 +1,30 @@
+﻿@model List<StudentManagementMVC.Models.Product>
+
+<h2>Product List</h2>
+
+<a href="/Product/Create" class="btn btn-success mb-3">➕ Add Product</a>
+
+<table class="table table-bordered table-hover">
+
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Action</th>
+    </tr>
+
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.Id</td>
+            <td>@p.Name</td>
+            <td>@p.Price</td>
+
+            <td>
+                <a href="/Product/Delete/@p.Id" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+
+        </tr>
+    }
+
+</table>

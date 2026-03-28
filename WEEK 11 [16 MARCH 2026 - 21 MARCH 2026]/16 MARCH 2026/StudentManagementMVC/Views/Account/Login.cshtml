@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Login";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .login-box {
+        width: 350px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center" style="height:90vh;">
+
+    <div class="card login-box p-4 shadow">
+
+        <h3 class="text-center mb-4">🔐 Login</h3>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        <form method="post">
+
+            <div class="mb-3">
+                <input type="text" name="username" class="form-control" placeholder="Username" required />
+            </div>
+
+            <div class="mb-3">
+                <input type="password" name="password" class="form-control" placeholder="Password" required />
+            </div>
+
+            <button class="btn btn-primary w-100">Login</button>
+
+        </form>
+
+    </div>
+
+</div>

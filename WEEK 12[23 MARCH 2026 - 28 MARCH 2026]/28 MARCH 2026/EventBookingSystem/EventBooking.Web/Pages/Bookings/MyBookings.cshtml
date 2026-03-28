@@ -1,0 +1,234 @@
+@page
+@model EventBooking.Web.Pages.Bookings.MyBookingsModel
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<div class="py-4 border-bottom bg-white mb-4">
+    <div class="container">
+        <h1 class="section-heading mb-1">My Bookings</h1>
+        <p class="text-muted mb-0">Manage your event tickets and reservations</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- ── Stats row ──────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4" id="statsRow">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon indigo"><i class="bi bi-ticket-perforated"></i></div>
+                    <div>
+                        <div class="fw-800 fs-4" id="totalBookings">—</div>
+                        <div class="text-muted small">Total Bookings</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+                    <div>
+                        <div class="fw-800 fs-4" id="confirmedCount">—</div>
+                        <div class="text-muted small">Confirmed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon amber"><i class="bi bi-people"></i></div>
+                    <div>
+                        <div class="fw-800 fs-4" id="totalSeats">—</div>
+                        <div class="text-muted small">Seats Booked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon red"><i class="bi bi-currency-rupee"></i></div>
+                    <div>
+                        <div class="fw-800 fs-4" id="totalSpent">—</div>
+                        <div class="text-muted small">Total Spent</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Bookings Table ──────────────────────────────────────────────── -->
+    <div id="bookingsContainer">
+        <div class="text-center py-5">
+            <div class="spinner-custom mx-auto mb-3"></div>
+            <p class="text-muted">Loading your bookings…</p>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Confirmation Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-700">Cancel Booking?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Are you sure you want to cancel this booking?
+                This action cannot be undone.</p>
+                <div id="cancelEventName" class="fw-semibold"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep Booking</button>
+                <button class="btn btn-danger" id="confirmCancelBtn">
+                    <i class="bi bi-x-circle me-1"></i>Yes, Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const API_BASE_URL = '@Model.ApiBaseUrl';
+let cancelBookingId = null;
+let cancelModal;
+
+document.addEventListener('DOMContentLoaded', () => {
+    cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
+    document.getElementById('confirmCancelBtn').addEventListener('click', doCancel);
+    loadBookings();
+});
+
+async function loadBookings() {
+    try {
+        const token = sessionStorage.getItem('jwt_token');
+        const res = await fetch(`${API_BASE_URL}/api/bookings`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) throw new Error();
+        const bookings = await res.json();
+        renderBookings(bookings);
+        renderStats(bookings);
+    } catch {
+        document.getElementById('bookingsContainer').innerHTML =
+            `<div class="alert alert-warning">
+             <i class="bi bi-info-circle me-2"></i>
+             Could not load bookings. Please ensure you're logged in and the API is running.</div>`;
+    }
+}
+
+function renderStats(bookings) {
+    const confirmed = bookings.filter(b => b.status === 'Confirmed');
+    document.getElementById('totalBookings').textContent = bookings.length;
+    document.getElementById('confirmedCount').textContent = confirmed.length;
+    document.getElementById('totalSeats').textContent = confirmed.reduce((s,b) => s + b.seatsBooked, 0);
+    const spent = confirmed.reduce((s,b) => s + b.totalAmount, 0);
+    document.getElementById('totalSpent').textContent = '₹' + Number(spent).toLocaleString('en-IN');
+}
+
+function renderBookings(bookings) {
+    const el = document.getElementById('bookingsContainer');
+    if (bookings.length === 0) {
+        el.innerHTML = `
+        <div class="text-center py-5">
+          <div style="font-size:4rem">🎟️</div>
+          <h5 class="mt-3 fw-700">No bookings yet</h5>
+          <p class="text-muted">Browse events and book your first ticket!</p>
+          <a href="/Events/Index" class="btn btn-primary-custom mt-2">Browse Events</a>
+        </div>`;
+        return;
+    }
+
+    const rows = bookings.map(b => {
+        const statusMap = { Confirmed:'status-confirmed', Cancelled:'status-cancelled', Pending:'status-pending' };
+        const sc = statusMap[b.status] || 'status-pending';
+        const canCancel = b.status === 'Confirmed';
+        const dateStr = new Date(b.bookingDate).toLocaleDateString('en-IN',
+            { day:'numeric', month:'short', year:'numeric' });
+
+        return `
+        <tr>
+          <td>
+            <div class="fw-600">${b.eventTitle}</div>
+            <div class="text-muted small"><i class="bi bi-calendar3 me-1"></i>${b.eventDate}</div>
+            <div class="text-muted small"><i class="bi bi-geo-alt me-1"></i>${b.eventLocation}</div>
+          </td>
+          <td><span class="confirmation-code">${b.confirmationCode}</span></td>
+          <td class="text-center fw-semibold">${b.seatsBooked}</td>
+          <td class="fw-700" style="color:var(--primary)">₹${Number(b.totalAmount).toLocaleString('en-IN')}</td>
+          <td>${dateStr}</td>
+          <td><span class="status-badge ${sc}">${b.status}</span></td>
+          <td>
+            ${canCancel
+              ? `<button class="btn btn-sm btn-outline-danger" onclick="promptCancel(${b.id},'${b.eventTitle}')">
+                   <i class="bi bi-x-circle me-1"></i>Cancel
+                 </button>`
+              : '<span class="text-muted small">—</span>'}
+          </td>
+        </tr>`;
+    }).join('');
+
+    el.innerHTML = `
+    <div class="booking-table">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Confirmation</th>
+            <th class="text-center">Seats</th>
+            <th>Amount</th>
+            <th>Booked On</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function promptCancel(id, title) {
+    cancelBookingId = id;
+    document.getElementById('cancelEventName').textContent = title;
+    cancelModal.show();
+}
+
+async function doCancel() {
+    if (!cancelBookingId) return;
+    const btn = document.getElementById('confirmCancelBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Cancelling…';
+
+    try {
+        const token = sessionStorage.getItem('jwt_token');
+        const res = await fetch(`${API_BASE_URL}/api/bookings/${cancelBookingId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        cancelModal.hide();
+
+        if (res.ok) {
+            showToast('Booking cancelled successfully.', 'success');
+            loadBookings();
+        } else {
+            const data = await res.json();
+            showToast(data.message || 'Could not cancel booking.', 'error');
+        }
+    } catch {
+        showToast('Network error. Please try again.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-x-circle me-1"></i>Yes, Cancel';
+        cancelBookingId = null;
+    }
+}
+</script>
+}

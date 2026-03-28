@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="glass mt-5 text-center">
+    <h2>👤 My Profile</h2>
+
+    <p><strong>Email:</strong> @User.Identity.Name</p>
+
+    <p>
+        <strong>Role:</strong>
+        @if (User.IsInRole("Admin"))
+        {
+            <span class="badge bg-danger">Admin</span>
+        }
+        else
+        {
+            <span class="badge bg-success">Employee</span>
+        }
+    </p>
+</div>
