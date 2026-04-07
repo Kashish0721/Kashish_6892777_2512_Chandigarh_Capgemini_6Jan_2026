@@ -1,0 +1,149 @@
+@model HealthcareSystem.Models.DTOs.CreateAppointmentDto
+@{
+    ViewData["Title"] = "Book Appointment";
+    var doctors = ViewBag.Doctors as HealthcareSystem.Models.DTOs.PagedResult<HealthcareSystem.Models.DTOs.DoctorDto>;
+    var specs = ViewBag.Specializations as IEnumerable<HealthcareSystem.Models.DTOs.SpecializationDto>;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white py-4 text-center border-0">
+                <i class="bi bi-calendar-plus-fill fs-2 mb-2 d-block"></i>
+                <h4 class="fw-bold mb-1">Book an Appointment</h4>
+                <p class="mb-0 opacity-75 small">Schedule your consultation</p>
+            </div>
+            <div class="card-body p-4">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2"
+                     style="display:@(ViewData.ModelState.ErrorCount > 0 ? "block" : "none")"></div>
+
+                <form asp-controller="Appointments" asp-action="Book" method="post" novalidate id="bookingForm">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Filter by specialization first -->
+                    @if (specs != null && specs.Any())
+                    {
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Filter by Specialization</label>
+                            <select id="specFilter" class="form-select" onchange="filterDoctors(this.value)">
+                                <option value="">All Specializations</option>
+                                @foreach (var s in specs)
+                                {
+                                    <option value="@s.Id">@s.Name</option>
+                                }
+                            </select>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label asp-for="DoctorId" class="form-label fw-semibold">
+                            Select Doctor <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="DoctorId" class="form-select" id="doctorSelect" required>
+                            <option value="">Choose a doctor...</option>
+                            @if (doctors?.Items != null)
+                            {
+                                @foreach (var doc in doctors.Items.Where(d => d.IsAvailable))
+                                {
+                                    var specs_str = doc.Specializations.Any() ? string.Join(", ", doc.Specializations) : "General";
+                                    <option value="@doc.Id"
+                                            data-fee="@doc.ConsultationFee"
+                                            data-specs="@string.Join(",", doc.Specializations)">
+                                        Dr. @doc.FullName — @specs_str
+                                        @(doc.ConsultationFee.HasValue ? $" (₹{doc.ConsultationFee})" : "")
+                                    </option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="DoctorId" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Fee display -->
+                    <div id="feeDisplay" class="alert alert-info py-2 small d-none">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Consultation fee: <strong id="feeValue">—</strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="AppointmentDate" class="form-label fw-semibold">
+                            Appointment Date & Time <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="AppointmentDate" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" class="form-control"
+                               min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                               max="@DateTime.Now.AddMonths(3).ToString("yyyy-MM-ddTHH:mm")"
+                               required />
+                        <span asp-validation-for="AppointmentDate" class="text-danger small"></span>
+                        <div class="form-text">Appointments available 9 AM – 6 PM</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Symptoms" class="form-label fw-semibold">Symptoms / Reason for Visit</label>
+                        <textarea asp-for="Symptoms" class="form-control" rows="3"
+                                  placeholder="Describe your symptoms or reason for the appointment..."
+                                  maxlength="500"></textarea>
+                        <div class="d-flex justify-content-between">
+                            <span asp-validation-for="Symptoms" class="text-danger small"></span>
+                            <small class="text-muted" id="symptomsCount">0/500</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Notes" class="form-label fw-semibold">Additional Notes</label>
+                        <textarea asp-for="Notes" class="form-control" rows="2"
+                                  placeholder="Any additional information for the doctor..." maxlength="500"></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1 py-2 fw-semibold">
+                            <i class="bi bi-calendar-check me-2"></i>Confirm Booking
+                        </button>
+                        <a href="/Appointments" class="btn btn-outline-secondary py-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Show fee when doctor is selected
+    document.getElementById('doctorSelect').addEventListener('change', function() {
+        var opt = this.options[this.selectedIndex];
+        var fee = opt.getAttribute('data-fee');
+        if (fee && fee !== '' && fee !== 'null') {
+            document.getElementById('feeDisplay').classList.remove('d-none');
+            document.getElementById('feeValue').textContent = '₹' + parseFloat(fee).toFixed(0);
+        } else {
+            document.getElementById('feeDisplay').classList.add('d-none');
+        }
+    });
+
+    // Symptoms character counter
+    var symptomsField = document.querySelector('textarea[name="Symptoms"]');
+    if (symptomsField) {
+        symptomsField.addEventListener('input', function() {
+            document.getElementById('symptomsCount').textContent = this.value.length + '/500';
+        });
+    }
+
+    // Trigger if doctor pre-selected from URL
+    var urlParams = new URLSearchParams(window.location.search);
+    var docId = urlParams.get('doctorId');
+    if (docId) {
+        var sel = document.getElementById('doctorSelect');
+        sel.value = docId;
+        sel.dispatchEvent(new Event('change'));
+    }
+
+    // Client-side validation: appointment time must be during business hours
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        var dt = new Date(document.querySelector('input[name="AppointmentDate"]').value);
+        var hour = dt.getHours();
+        if (hour < 9 || hour >= 18) {
+            e.preventDefault();
+            alert('Please select an appointment time between 9:00 AM and 6:00 PM.');
+        }
+    });
+</script>
+}

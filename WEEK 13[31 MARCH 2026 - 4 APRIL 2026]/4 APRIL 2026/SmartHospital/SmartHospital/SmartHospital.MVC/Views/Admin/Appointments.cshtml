@@ -1,0 +1,137 @@
+@model List<AppointmentViewModel>
+@{ ViewData["Title"] = "Manage Appointments"; }
+
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="mb-4">
+        <h1 class="fw-bold mb-2">
+            <i class="bi bi-calendar-check" style="color: var(--primary); font-size: 1.8rem;"></i>
+            Manage Appointments
+        </h1>
+        <p class="text-muted fs-6">View and manage all patient appointments</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="dashboard-grid mb-4">
+        <div class="card stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5>Total Appointments</h5>
+                    <div class="number">@Model.Count</div>
+                </div>
+                <i class="bi bi-calendar-event" style="font-size: 2.5rem; opacity: 0.2;"></i>
+            </div>
+        </div>
+        <div class="card stat-card orange">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5>Completed</h5>
+                    <div class="number">@Model.Count(a=>a.Status=="Completed")</div>
+                </div>
+                <i class="bi bi-check-circle" style="font-size: 2.5rem; opacity: 0.2;"></i>
+            </div>
+        </div>
+        <div class="card stat-card blue">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5>Booked</h5>
+                    <div class="number">@Model.Count(a=>a.Status=="Booked")</div>
+                </div>
+                <i class="bi bi-calendar-check" style="font-size: 2.5rem; opacity: 0.2;"></i>
+            </div>
+        </div>
+        <div class="card stat-card purple">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5>Cancelled</h5>
+                    <div class="number">@Model.Count(a=>a.Status=="Cancelled")</div>
+                </div>
+                <i class="bi bi-x-circle" style="font-size: 2.5rem; opacity: 0.2;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-list-ul me-2" style="color: var(--primary);"></i>
+                All Appointments
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: var(--text-secondary); opacity: 0.3;"></i>
+                    <p class="text-muted mt-3">No appointments found</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">#</th>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Department</th>
+                                <th>Date & Time</th>
+                                <th style="width: 100px;">Status</th>
+                                <th style="width: 80px;" class="text-center">Rx</th>
+                                <th style="width: 80px;" class="text-center">Bill</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var a in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge" style="background: var(--border-color); color: var(--text-primary);">@a.AppointmentId</span>
+                                </td>
+                                <td><strong>@a.PatientName</strong></td>
+                                <td>Dr. @a.DoctorName</td>
+                                <td><span class="badge bg-light text-primary">@a.DepartmentName</span></td>
+                                <td>@a.AppointmentDate.ToString("dd MMM yyyy HH:mm")</td>
+                                <td>
+                                    @{
+                                        string badgeClass = a.Status switch
+                                        {
+                                            "Completed" => "badge-completed",
+                                            "Cancelled" => "badge-cancelled",
+                                            "Booked" => "badge-booked",
+                                            _ => "badge-pending"
+                                        };
+                                    }
+                                    <span class="badge @badgeClass">@a.Status</span>
+                                </td>
+                                <td class="text-center">
+                                    @if (a.HasPrescription)
+                                    {
+                                        <i class="bi bi-check-circle" style="color: var(--primary); font-size: 1.2rem;"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-dash-circle" style="color: var(--text-secondary); opacity: 0.4;"></i>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (a.HasBill)
+                                    {
+                                        <i class="bi bi-check-circle" style="color: var(--primary); font-size: 1.2rem;"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-dash-circle" style="color: var(--text-secondary); opacity: 0.4;"></i>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

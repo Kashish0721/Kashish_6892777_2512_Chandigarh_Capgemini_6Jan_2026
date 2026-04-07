@@ -1,0 +1,88 @@
+@model HealthcareSystem.Models.DTOs.DoctorDto
+@{
+    ViewData["Title"] = "Doctor Profile";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">Doctor Profile</h3>
+    <a href="/Doctors" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Back</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-4">
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold mx-auto mb-3"
+                 style="width:90px;height:90px;font-size:2.2rem">
+                @Model.FullName[0]
+            </div>
+            <h5 class="fw-bold mb-1">Dr. @Model.FullName</h5>
+            <p class="text-muted small mb-2">@Model.Email</p>
+            @if (Model.IsAvailable)
+            {
+                <span class="badge bg-success px-3 py-2">Available for Appointments</span>
+            }
+            else
+            {
+                <span class="badge bg-danger px-3 py-2">Currently Unavailable</span>
+            }
+
+            @if (Model.Specializations.Any())
+            {
+                <hr />
+                <div class="d-flex flex-wrap gap-1 justify-content-center">
+                    @foreach (var s in Model.Specializations)
+                    {
+                        <span class="badge bg-primary bg-opacity-10 text-primary">@s</span>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">Professional Information</h5>
+                <div class="row g-3">
+                    <div class="col-sm-4 text-center">
+                        <div class="bg-primary bg-opacity-10 rounded p-3">
+                            <i class="bi bi-award text-primary fs-4 mb-1 d-block"></i>
+                            <h5 class="fw-bold mb-0">@(Model.YearsOfExperience ?? 0)</h5>
+                            <small class="text-muted">Years Experience</small>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 text-center">
+                        <div class="bg-success bg-opacity-10 rounded p-3">
+                            <i class="bi bi-people text-success fs-4 mb-1 d-block"></i>
+                            <h5 class="fw-bold mb-0">@Model.TotalAppointments</h5>
+                            <small class="text-muted">Total Patients</small>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 text-center">
+                        <div class="bg-warning bg-opacity-10 rounded p-3">
+                            <i class="bi bi-currency-rupee text-warning fs-4 mb-1 d-block"></i>
+                            <h5 class="fw-bold mb-0">₹@(Model.ConsultationFee ?? 0)</h5>
+                            <small class="text-muted">Consultation Fee</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Biography))
+        {
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-2"><i class="bi bi-file-person me-2 text-primary"></i>About</h6>
+                    <p class="text-muted mb-0">@Model.Biography</p>
+                </div>
+            </div>
+        }
+
+        @if (Context.Session.GetString("UserRole") == "Patient" && Model.IsAvailable)
+        {
+            <a href="/Appointments/Book?doctorId=@Model.Id" class="btn btn-primary w-100 py-2">
+                <i class="bi bi-calendar-plus me-2"></i>Book Appointment with Dr. @Model.FullName
+            </a>
+        }
+    </div>
+</div>

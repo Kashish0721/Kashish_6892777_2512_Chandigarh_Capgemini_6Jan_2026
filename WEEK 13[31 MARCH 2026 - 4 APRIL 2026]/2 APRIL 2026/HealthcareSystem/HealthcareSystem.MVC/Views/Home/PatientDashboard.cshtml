@@ -1,0 +1,103 @@
+@model IEnumerable<HealthcareSystem.Models.DTOs.AppointmentDto>
+@{
+    ViewData["Title"] = "My Dashboard";
+    var list = Model?.ToList() ?? new List<HealthcareSystem.Models.DTOs.AppointmentDto>();
+    var upcoming = list.Where(a => a.AppointmentDate >= DateTime.Now && a.Status != "Cancelled").OrderBy(a => a.AppointmentDate).Take(5).ToList();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">My Dashboard</h3>
+        <p class="text-muted mb-0">Welcome, @ViewBag.UserName</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/Appointments/Book" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Book Appointment
+        </a>
+        <a href="/Bills" class="btn btn-outline-secondary">
+            <i class="bi bi-receipt me-2"></i>View Bills
+        </a>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm text-center py-3">
+            <div class="card-body">
+                <i class="bi bi-calendar2-check text-primary fs-2 mb-2"></i>
+                <h4 class="fw-bold">@list.Count</h4>
+                <p class="text-muted small mb-0">Total Appointments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm text-center py-3">
+            <div class="card-body">
+                <i class="bi bi-hourglass-split text-warning fs-2 mb-2"></i>
+                <h4 class="fw-bold">@list.Count(a => a.Status == "Pending")</h4>
+                <p class="text-muted small mb-0">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm text-center py-3">
+            <div class="card-body">
+                <i class="bi bi-check2-circle text-success fs-2 mb-2"></i>
+                <h4 class="fw-bold">@list.Count(a => a.Status == "Completed")</h4>
+                <p class="text-muted small mb-0">Completed</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Appointments -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-0 pt-4 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0"><i class="bi bi-calendar-event me-2 text-primary"></i>Upcoming Appointments</h5>
+        <a href="/Appointments" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body p-0">
+        @if (!upcoming.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar-x fs-1 d-block mb-3 opacity-25"></i>
+                <p class="mb-3">No upcoming appointments</p>
+                <a href="/Appointments/Book" class="btn btn-primary btn-sm">Book Now</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Doctor</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var appt in upcoming)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">Dr. @appt.DoctorName</div>
+                                </td>
+                                <td>
+                                    <div>@appt.AppointmentDate.ToString("MMM dd, yyyy")</div>
+                                    <small class="text-muted">@appt.AppointmentDate.ToString("hh:mm tt")</small>
+                                </td>
+                                <td>
+                                    <span class="badge @(appt.Status == "Confirmed" ? "bg-success" : appt.Status == "Pending" ? "bg-warning text-dark" : "bg-secondary")">
+                                        @appt.Status
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,71 @@
+@model HealthcareSystem.Models.DTOs.UpdatePatientDto
+@{
+    ViewData["Title"] = "Edit Patient";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h4 class="fw-bold mb-0"><i class="bi bi-pencil-square me-2 text-warning"></i>Edit Patient Profile</h4>
+            </div>
+            <div class="card-body p-4">
+                <div asp-validation-summary="All" class="alert alert-danger small py-2"
+                     style="display:@(ViewData.ModelState.ErrorCount > 0 ? "block" : "none")"></div>
+
+                <form asp-controller="Patients" asp-action="Edit" asp-route-id="@ViewBag.PatientId" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold">Phone Number</label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="DateOfBirth" class="form-label fw-semibold">Date of Birth</label>
+                            <input asp-for="DateOfBirth" type="date" class="form-control"
+                                   max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Gender" class="form-label fw-semibold">Gender</label>
+                            <select asp-for="Gender" class="form-select">
+                                <option value="">Select gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="BloodGroup" class="form-label fw-semibold">Blood Group</label>
+                            <select asp-for="BloodGroup" class="form-select">
+                                <option value="">Select blood group</option>
+                                @foreach (var bg in new[] { "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-" })
+                                {
+                                    <option value="@bg">@bg</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Address" class="form-label fw-semibold">Address</label>
+                            <textarea asp-for="Address" class="form-control" rows="2"></textarea>
+                            <span asp-validation-for="Address" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="MedicalHistory" class="form-label fw-semibold">Medical History</label>
+                            <textarea asp-for="MedicalHistory" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="MedicalHistory" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-warning flex-grow-1 py-2 fw-semibold">
+                            <i class="bi bi-save me-2"></i>Update Profile
+                        </button>
+                        <a href="/Patients" class="btn btn-outline-secondary py-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

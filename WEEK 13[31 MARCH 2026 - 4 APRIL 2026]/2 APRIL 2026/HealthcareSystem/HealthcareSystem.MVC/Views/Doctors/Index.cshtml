@@ -1,0 +1,164 @@
+@model HealthcareSystem.Models.DTOs.PagedResult<HealthcareSystem.Models.DTOs.DoctorDto>
+@{
+    ViewData["Title"] = "Doctors";
+    var specs = ViewBag.Specializations as IEnumerable<HealthcareSystem.Models.DTOs.SpecializationDto>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0"><i class="bi bi-person-badge me-2 text-primary"></i>Doctors</h3>
+    @if (Context.Session.GetString("UserRole") == "Doctor")
+    {
+        <a href="/Doctors/Create" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle me-1"></i>Setup Profile</a>
+    }
+</div>
+
+<!-- Filter by specialization -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <form method="get" class="d-flex gap-2">
+                    <input type="text" name="search" value="@ViewBag.Search" class="form-control"
+                           placeholder="Search doctors by name or specialization..." />
+                    <button type="submit" class="btn btn-primary px-4"><i class="bi bi-search"></i></button>
+                    @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
+                    {
+                        <a href="/Doctors" class="btn btn-outline-secondary">Clear</a>
+                    }
+                </form>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/Doctors" class="btn btn-sm @(ViewBag.SpecializationId == null ? "btn-primary" : "btn-outline-primary")">All</a>
+                    @if (specs != null)
+                    {
+                        @foreach (var s in specs)
+                        {
+                            <a href="/Doctors?specializationId=@s.Id"
+                               class="btn btn-sm @(ViewBag.SpecializationId?.ToString() == s.Id.ToString() ? "btn-primary" : "btn-outline-primary")">
+                                @s.Name
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Doctor cards grid -->
+@if (Model?.Items == null || !Model.Items.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-person-badge fs-1 d-block mb-2 opacity-25"></i>
+        <p>No doctors found</p>
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-3">
+        @foreach (var doc in Model.Items)
+        {
+            <div class="col-md-6 col-xl-4">
+                <div class="card border-0 shadow-sm h-100 doctor-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                                 style="width:50px;height:50px;font-size:1.3rem">
+                                @doc.FullName[0]
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <h6 class="fw-bold mb-0">Dr. @doc.FullName</h6>
+                                <small class="text-muted">@doc.Email</small>
+                                <div class="mt-1">
+                                    @if (doc.IsAvailable)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Available</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Unavailable</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Specializations -->
+                        @if (doc.Specializations.Any())
+                        {
+                            <div class="mb-3 d-flex flex-wrap gap-1">
+                                @foreach (var spec in doc.Specializations.Take(3))
+                                {
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">@spec</span>
+                                }
+                                @if (doc.Specializations.Count > 3)
+                                {
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary">+@(doc.Specializations.Count - 3) more</span>
+                                }
+                            </div>
+                        }
+
+                        <div class="row text-center g-2 mb-3">
+                            <div class="col-4">
+                                <div class="bg-light rounded p-2">
+                                    <div class="fw-bold text-primary small">@(doc.YearsOfExperience ?? 0)y</div>
+                                    <div class="text-muted" style="font-size:10px">Experience</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-light rounded p-2">
+                                    <div class="fw-bold text-success small">@doc.TotalAppointments</div>
+                                    <div class="text-muted" style="font-size:10px">Patients</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-light rounded p-2">
+                                    <div class="fw-bold text-warning small">₹@(doc.ConsultationFee ?? 0)</div>
+                                    <div class="text-muted" style="font-size:10px">Fee</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a href="/Doctors/Details/@doc.Id" class="btn btn-outline-primary btn-sm flex-grow-1">
+                                <i class="bi bi-eye me-1"></i>View Profile
+                            </a>
+                            @if (Context.Session.GetString("UserRole") == "Patient" && doc.IsAvailable)
+                            {
+                                <a href="/Appointments/Book?doctorId=@doc.Id" class="btn btn-primary btn-sm flex-grow-1">
+                                    <i class="bi bi-calendar-plus me-1"></i>Book
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">Showing @Model.Items.Count of @Model.TotalCount doctors</small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <li class="page-item"><a class="page-link" href="?page=@(Model.Page-1)">‹</a></li>
+                    }
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.Page ? "active" : "")">
+                            <a class="page-link" href="?page=@i">@i</a>
+                        </li>
+                    }
+                    @if (Model.HasNextPage)
+                    {
+                        <li class="page-item"><a class="page-link" href="?page=@(Model.Page+1)">›</a></li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+}

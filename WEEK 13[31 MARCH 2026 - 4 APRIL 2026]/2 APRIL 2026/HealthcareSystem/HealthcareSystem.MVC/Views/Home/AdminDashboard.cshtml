@@ -1,0 +1,162 @@
+@model HealthcareSystem.Models.DTOs.DashboardDto
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Dashboard</h3>
+        <p class="text-muted mb-0">Welcome back, @ViewBag.UserName</p>
+    </div>
+    <span class="badge bg-primary fs-6 px-3 py-2">@DateTime.Now.ToString("dddd, MMM dd yyyy")</span>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex p-3 mb-3">
+                    <i class="bi bi-people-fill text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-bold mb-0">@(Model?.TotalPatients ?? 0)</h3>
+                <p class="text-muted small mb-0">Total Patients</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex p-3 mb-3">
+                    <i class="bi bi-person-badge-fill text-success fs-4"></i>
+                </div>
+                <h3 class="fw-bold mb-0">@(Model?.TotalDoctors ?? 0)</h3>
+                <p class="text-muted small mb-0">Total Doctors</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex p-3 mb-3">
+                    <i class="bi bi-calendar-check-fill text-info fs-4"></i>
+                </div>
+                <h3 class="fw-bold mb-0">@(Model?.TotalAppointments ?? 0)</h3>
+                <p class="text-muted small mb-0">Total Appointments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex p-3 mb-3">
+                    <i class="bi bi-hourglass-split text-warning fs-4"></i>
+                </div>
+                <h3 class="fw-bold mb-0">@(Model?.PendingAppointments ?? 0)</h3>
+                <p class="text-muted small mb-0">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex p-3 mb-3">
+                    <i class="bi bi-calendar-day-fill text-danger fs-4"></i>
+                </div>
+                <h3 class="fw-bold mb-0">@(Model?.TodayAppointments ?? 0)</h3>
+                <p class="text-muted small mb-0">Today</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex p-3 mb-3">
+                    <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                </div>
+                <h3 class="fw-bold mb-0">@(Model?.CompletedAppointments ?? 0)</h3>
+                <p class="text-muted small mb-0">Completed</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="fw-bold"><i class="bi bi-lightning-charge me-2 text-warning"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a href="/Patients" class="btn btn-outline-primary w-100 py-3">
+                            <i class="bi bi-people d-block fs-4 mb-1"></i>
+                            <span class="small">Manage Patients</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Doctors" class="btn btn-outline-success w-100 py-3">
+                            <i class="bi bi-person-badge d-block fs-4 mb-1"></i>
+                            <span class="small">Manage Doctors</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Appointments" class="btn btn-outline-info w-100 py-3">
+                            <i class="bi bi-calendar-check d-block fs-4 mb-1"></i>
+                            <span class="small">Appointments</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Admin/Users" class="btn btn-outline-danger w-100 py-3">
+                            <i class="bi bi-shield-check d-block fs-4 mb-1"></i>
+                            <span class="small">User Management</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="fw-bold"><i class="bi bi-bar-chart me-2 text-primary"></i>Appointment Summary</h5>
+            </div>
+            <div class="card-body">
+                @{
+                    var total = Model?.TotalAppointments > 0 ? Model.TotalAppointments : 1;
+                    var pendingPct = (int)((Model?.PendingAppointments ?? 0) * 100.0 / total);
+                    var completedPct = (int)((Model?.CompletedAppointments ?? 0) * 100.0 / total);
+                }
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="small fw-semibold">Pending</span>
+                        <span class="small text-muted">@(Model?.PendingAppointments ?? 0)</span>
+                    </div>
+                    <div class="progress" style="height:8px">
+                        <div class="progress-bar bg-warning" style="width:@pendingPct%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="small fw-semibold">Completed</span>
+                        <span class="small text-muted">@(Model?.CompletedAppointments ?? 0)</span>
+                    </div>
+                    <div class="progress" style="height:8px">
+                        <div class="progress-bar bg-success" style="width:@completedPct%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="small fw-semibold">Today</span>
+                        <span class="small text-muted">@(Model?.TodayAppointments ?? 0)</span>
+                    </div>
+                    <div class="progress" style="height:8px">
+                        <div class="progress-bar bg-info" style="width:@((int)((Model?.TodayAppointments ?? 0) * 100.0 / total))%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

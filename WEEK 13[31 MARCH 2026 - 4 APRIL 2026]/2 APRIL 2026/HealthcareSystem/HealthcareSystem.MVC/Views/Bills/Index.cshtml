@@ -1,0 +1,85 @@
+@model IEnumerable<HealthcareSystem.Models.DTOs.BillDto>
+@{
+    ViewData["Title"] = "My Bills";
+    var bills = Model?.ToList() ?? new List<HealthcareSystem.Models.DTOs.BillDto>();
+    var role = Context.Session.GetString("UserRole");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Billing</h3>
+        <p class="text-muted mb-0">Review your bills and payment status.</p>
+    </div>
+    <a href="/Appointments" class="btn btn-outline-primary">
+        <i class="bi bi-calendar-check me-2"></i>My Appointments
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        @if (!bills.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-receipt fs-1 d-block mb-3 opacity-25"></i>
+                <p class="mb-3">No bills found yet.</p>
+                <a href="/Appointments" class="btn btn-primary btn-sm">See Appointments</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Appointment</th>
+                            <th>Doctor</th>
+                            <th>Created</th>
+                            <th>Consultation</th>
+                            <th>Medicine</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bill in bills)
+                        {
+                            <tr>
+                                <td>#@bill.AppointmentId</td>
+                                <td>@bill.DoctorName</td>
+                                <td>
+                                    @bill.CreatedAt.ToString("MMM dd, yyyy")<br />
+                                    <small class="text-muted">@bill.CreatedAt.ToString("hh:mm tt")</small>
+                                </td>
+                                <td>@bill.ConsultationFee:C</td>
+                                <td>@bill.MedicineCharges:C</td>
+                                <td class="fw-bold">@bill.TotalAmount:C</td>
+                                <td>
+                                    <span class="badge @(bill.PaymentStatus == "Paid" ? "bg-success" : "bg-warning text-dark")">
+                                        @bill.PaymentStatus
+                                    </span>
+                                    @if (bill.PaidAt.HasValue)
+                                    {
+                                        <div class="small text-muted">@bill.PaidAt.Value.ToString("MMM d, yyyy")</div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (role == "Patient" && bill.PaymentStatus != "Paid")
+                                    {
+                                        <form asp-action="Pay" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@bill.Id" />
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="bi bi-credit-card-fill me-1"></i>Pay
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

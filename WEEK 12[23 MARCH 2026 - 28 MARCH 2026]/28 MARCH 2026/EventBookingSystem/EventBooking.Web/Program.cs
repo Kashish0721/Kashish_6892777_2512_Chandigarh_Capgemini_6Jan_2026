@@ -11,7 +11,7 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromHours(8);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.None; // 🔴 FIX
 });
 
 // ── Cookie-based auth for Razor Pages ────────────────────────────────────────
@@ -30,7 +30,8 @@ builder.Services.AddAuthorization();
 // ── HttpClient for API calls ──────────────────────────────────────────────────
 builder.Services.AddHttpClient("EventBookingAPI", client =>
 {
-    var apiBase = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7000";
+    // 🔴 FIX: HTTPS → HTTP
+    var apiBase = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5000";
     client.BaseAddress = new Uri(apiBase);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });

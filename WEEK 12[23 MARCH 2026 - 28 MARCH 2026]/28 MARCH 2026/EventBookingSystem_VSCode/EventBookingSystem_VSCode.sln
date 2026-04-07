@@ -1,0 +1,36 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EventBookingSystem_VSCode", "EventBookingSystem_VSCode", "{114D923D-5B3D-87A2-F3DE-A3298277CE7A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBooking.API", "EventBookingSystem_VSCode\EventBooking.API\EventBooking.API.csproj", "{37179555-2C80-72EF-0AC4-FD561709C6D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBooking.Web", "EventBookingSystem_VSCode\EventBooking.Web\EventBooking.Web.csproj", "{24A20732-84C2-978C-DBB2-235039BB78BF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{37179555-2C80-72EF-0AC4-FD561709C6D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37179555-2C80-72EF-0AC4-FD561709C6D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37179555-2C80-72EF-0AC4-FD561709C6D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37179555-2C80-72EF-0AC4-FD561709C6D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24A20732-84C2-978C-DBB2-235039BB78BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24A20732-84C2-978C-DBB2-235039BB78BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24A20732-84C2-978C-DBB2-235039BB78BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24A20732-84C2-978C-DBB2-235039BB78BF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{37179555-2C80-72EF-0AC4-FD561709C6D8} = {114D923D-5B3D-87A2-F3DE-A3298277CE7A}
+		{24A20732-84C2-978C-DBB2-235039BB78BF} = {114D923D-5B3D-87A2-F3DE-A3298277CE7A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B6C2BD56-DB16-43C4-B84D-489A72CC4ABF}
+	EndGlobalSection
+EndGlobal

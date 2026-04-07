@@ -3,22 +3,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
-// 👇 ADD THESE
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
+// 🔥 Swagger ALWAYS enable (remove environment check)
+app.UseSwagger();
+app.UseSwaggerUI();
 
-    // 👇 ADD THESE
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.MapControllers();
-}
+// Map controllers (IMPORTANT)
+app.MapControllers();
 
 app.UseHttpsRedirection();
 
@@ -29,7 +24,7 @@ var summaries = new[]
 
 app.MapGet("/weatherforecast", () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
+    var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast(
             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
             Random.Shared.Next(-20, 55),

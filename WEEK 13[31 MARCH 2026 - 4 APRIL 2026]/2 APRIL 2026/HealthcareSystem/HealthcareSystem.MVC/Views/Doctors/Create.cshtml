@@ -1,0 +1,82 @@
+@model HealthcareSystem.Models.DTOs.CreateDoctorDto
+@{
+    ViewData["Title"] = "Setup Doctor Profile";
+    var specs = ViewBag.Specializations as IEnumerable<HealthcareSystem.Models.DTOs.SpecializationDto>;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white py-4 text-center border-0">
+                <i class="bi bi-person-badge-fill fs-2 mb-2 d-block"></i>
+                <h4 class="fw-bold mb-1">Setup Doctor Profile</h4>
+                <p class="mb-0 opacity-75 small">Complete your professional information</p>
+            </div>
+            <div class="card-body p-4">
+                <div asp-validation-summary="All" class="alert alert-danger small py-2"
+                     style="display:@(ViewData.ModelState.ErrorCount > 0 ? "block" : "none")"></div>
+
+                <form asp-controller="Doctors" asp-action="Create" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold">Phone Number</label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="+91 98765 43210" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="LicenseNumber" class="form-label fw-semibold">License Number</label>
+                            <input asp-for="LicenseNumber" class="form-control" placeholder="MCI-12345" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="YearsOfExperience" class="form-label fw-semibold">Years of Experience</label>
+                            <input asp-for="YearsOfExperience" type="number" class="form-control" min="0" max="60" />
+                            <span asp-validation-for="YearsOfExperience" class="text-danger small"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="ConsultationFee" class="form-label fw-semibold">Consultation Fee (₹)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₹</span>
+                                <input asp-for="ConsultationFee" type="number" class="form-control" min="0" step="50" />
+                            </div>
+                            <span asp-validation-for="ConsultationFee" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Biography" class="form-label fw-semibold">Biography</label>
+                            <textarea asp-for="Biography" class="form-control" rows="3"
+                                      placeholder="Brief professional summary..."></textarea>
+                            <span asp-validation-for="Biography" class="text-danger small"></span>
+                        </div>
+
+                        @if (specs != null && specs.Any())
+                        {
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Specializations</label>
+                                <div class="row g-2">
+                                    @foreach (var spec in specs)
+                                    {
+                                        <div class="col-sm-4">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="SpecializationIds" value="@spec.Id" id="spec_@spec.Id" />
+                                                <label class="form-check-label" for="spec_@spec.Id">@spec.Name</label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-success flex-grow-1 py-2 fw-semibold">
+                            <i class="bi bi-check-circle me-2"></i>Create Profile
+                        </button>
+                        <a href="/" class="btn btn-outline-secondary py-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

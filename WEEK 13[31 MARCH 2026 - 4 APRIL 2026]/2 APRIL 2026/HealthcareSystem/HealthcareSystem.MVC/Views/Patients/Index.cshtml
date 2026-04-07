@@ -1,0 +1,127 @@
+@* ===== Patients/Index.cshtml ===== *@
+@model HealthcareSystem.Models.DTOs.PagedResult<HealthcareSystem.Models.DTOs.PatientDto>
+@{
+    ViewData["Title"] = "Patients";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0"><i class="bi bi-people me-2 text-primary"></i>Patients</h3>
+    <span class="badge bg-primary fs-6">@(Model?.TotalCount ?? 0) total</span>
+</div>
+
+<!-- Search -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="d-flex gap-2">
+            <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by name or email..." />
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-search"></i></button>
+            @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
+            {
+                <a href="/Patients" class="btn btn-outline-secondary">Clear</a>
+            }
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        @if (Model?.Items == null || !Model.Items.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-people fs-1 d-block mb-2 opacity-25"></i>
+                <p>No patients found</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th><th>Name</th><th>Email</th><th>Phone</th>
+                            <th>Blood Group</th><th>Appointments</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model.Items)
+                        {
+                            <tr>
+                                <td><span class="badge bg-light text-dark">@p.Id</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                                             style="width:34px;height:34px;font-size:13px;flex-shrink:0">
+                                            @p.FullName[0]
+                                        </div>
+                                        <span class="fw-semibold">@p.FullName</span>
+                                    </div>
+                                </td>
+                                <td class="text-muted">@p.Email</td>
+                                <td>@(p.PhoneNumber ?? "—")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(p.BloodGroup))
+                                    {
+                                        <span class="badge bg-danger">@p.BloodGroup</span>
+                                    }
+                                    else { <span class="text-muted">—</span> }
+                                </td>
+                                <td><span class="badge bg-info text-dark">@p.TotalAppointments</span></td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="/Patients/Details/@p.Id" class="btn btn-sm btn-outline-primary" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="/Patients/Edit/@p.Id" class="btn btn-sm btn-outline-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if (Context.Session.GetString("UserRole") == "Admin")
+                                        {
+                                            <form asp-controller="Patients" asp-action="Delete" method="post" class="d-inline"
+                                                  onsubmit="return confirm('Delete this patient?')">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@p.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                    <small class="text-muted">Showing @Model.Items.Count of @Model.TotalCount</small>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            @if (Model.HasPreviousPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=@(Model.Page-1)&search=@ViewBag.Search">‹ Prev</a>
+                                </li>
+                            }
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.Page ? "active" : "")">
+                                    <a class="page-link" href="?page=@i&search=@ViewBag.Search">@i</a>
+                                </li>
+                            }
+                            @if (Model.HasNextPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=@(Model.Page+1)&search=@ViewBag.Search">Next ›</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            }
+        }
+    </div>
+</div>

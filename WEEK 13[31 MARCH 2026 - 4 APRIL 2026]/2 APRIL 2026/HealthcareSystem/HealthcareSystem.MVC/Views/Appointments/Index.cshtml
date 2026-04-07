@@ -1,0 +1,244 @@
+@model HealthcareSystem.Models.DTOs.PagedResult<HealthcareSystem.Models.DTOs.AppointmentDto>
+@{
+    ViewData["Title"] = "Appointments";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0"><i class="bi bi-calendar-check me-2 text-primary"></i>Appointments</h3>
+    @if (Context.Session.GetString("UserRole") == "Patient")
+    {
+        <a href="/Appointments/Book" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle me-1"></i>Book New</a>
+    }
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        @if (Model?.Items == null || !Model.Items.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar-x fs-1 d-block mb-2 opacity-25"></i>
+                <p>No appointments found</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th><th>Patient</th><th>Doctor</th><th>Date & Time</th>
+                            <th>Status</th><th>Fee</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model.Items)
+                        {
+                            <tr>
+                                <td><small class="text-muted">@a.Id</small></td>
+                                <td class="fw-semibold">@a.PatientName</td>
+                                <td>Dr. @a.DoctorName</td>
+                                <td>
+                                    <div>@a.AppointmentDate.ToString("MMM dd, yyyy")</div>
+                                    <small class="text-muted">@a.AppointmentDate.ToString("hh:mm tt")</small>
+                                </td>
+                                <td>
+                                    @{
+                                        var badgeClass = a.Status switch {
+                                            "Confirmed" => "bg-success",
+                                            "Pending" => "bg-warning text-dark",
+                                            "Completed" => "bg-secondary",
+                                            "Cancelled" => "bg-danger",
+                                            _ => "bg-light text-dark"
+                                        };
+                                    }
+                                    <span class="badge @badgeClass">@a.Status</span>
+                                </td>
+                                <td>@(a.Fee.HasValue ? $"₹{a.Fee}" : "—")</td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        @if (a.Status == "Pending" && (Context.Session.GetString("UserRole") == "Doctor" || Context.Session.GetString("UserRole") == "Admin"))
+                                        {
+                                            <form asp-controller="Appointments" asp-action="UpdateStatus" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@a.Id" />
+                                                <input type="hidden" name="status" value="Confirmed" />
+                                                <button type="submit" class="btn btn-success btn-sm">Confirm</button>
+                                            </form>
+                                        }
+                                        @if ((a.Status == "Confirmed" || a.Status == "Completed") && Context.Session.GetString("UserRole") == "Admin")
+                                        {
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#billModal" data-appointment-id="@a.Id" data-patient-name="@a.PatientName" data-doctor-name="@a.DoctorName">
+                                                <i class="bi bi-receipt me-1"></i>Bill
+                                            </button>
+                                        }
+                                        @if (Context.Session.GetString("UserRole") == "Admin")
+                                        {
+                                            <form asp-controller="Appointments" asp-action="Delete" method="post" class="d-inline"
+                                                  onsubmit="return confirm('Delete this appointment?')">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@a.Id" />
+                                                <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                    <small class="text-muted">Page @Model.Page of @Model.TotalPages</small>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            @if (Model.HasPreviousPage)
+                            {
+                                <li class="page-item"><a class="page-link" href="?page=@(Model.Page-1)">‹</a></li>
+                            }
+                            @for (int i = 1; i <= Math.Min(Model.TotalPages, 7); i++)
+                            {
+                                <li class="page-item @(i == Model.Page ? "active" : "")">
+                                    <a class="page-link" href="?page=@i">@i</a>
+                                </li>
+                            }
+                            @if (Model.HasNextPage)
+                            {
+                                <li class="page-item"><a class="page-link" href="?page=@(Model.Page+1)">›</a></li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- Bill Creation Modal -->
+<div class="modal fade" id="billModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-receipt me-2"></i>Create Bill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div id="billAlert" class="alert alert-dismissible fade" role="alert" style="display:none; margin-bottom:0; border-radius:0;">
+                <span id="billAlertText"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <form id="billForm" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Appointment</label>
+                        <div class="form-control-plaintext" id="billAppointmentInfo">-</div>
+                        <input type="hidden" name="AppointmentId" id="billAppointmentId" value="0" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="consultationFee" class="form-label">Consultation Fee (₹)</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="consultationFee" name="ConsultationFee" placeholder="0.00" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="medicineCharges" class="form-label">Medicine Charges (₹)</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="medicineCharges" name="MedicineCharges" placeholder="0.00" required />
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <small><strong>Total:</strong> <span id="totalBill">₹0.00</span></small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="billSubmitBtn" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i>Create Bill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('billModal');
+    const form = document.getElementById('billForm');
+    const submitBtn = document.getElementById('billSubmitBtn');
+    const appointmentIdInput = document.getElementById('billAppointmentId');
+    const appointmentInfo = document.getElementById('billAppointmentInfo');
+    const consultationFee = document.getElementById('consultationFee');
+    const medicineCharges = document.getElementById('medicineCharges');
+    const totalBill = document.getElementById('totalBill');
+    const alertDiv = document.getElementById('billAlert');
+    const alertText = document.getElementById('billAlertText');
+
+    // Update total when fees change
+    const updateTotal = () => {
+        const consultation = parseFloat(consultationFee.value) || 0;
+        const medicine = parseFloat(medicineCharges.value) || 0;
+        const total = consultation + medicine;
+        totalBill.textContent = '₹' + total.toFixed(2);
+    };
+
+    consultationFee.addEventListener('input', updateTotal);
+    medicineCharges.addEventListener('input', updateTotal);
+
+    // Show alert message
+    const showAlert = (message, isSuccess) => {
+        alertDiv.className = isSuccess ? 'alert alert-success alert-dismissible fade show' : 'alert alert-danger alert-dismissible fade show';
+        alertDiv.style.display = 'block';
+        alertText.textContent = message;
+        if (isSuccess) {
+            setTimeout(() => {
+                modal.querySelector('.btn-close').click();
+                location.reload();
+            }, 1500);
+        }
+    };
+
+    // Handle form submission via AJAX
+    submitBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
+
+        try {
+            const billData = {
+                appointmentId: parseInt(appointmentIdInput.value),
+                consultationFee: parseFloat(consultationFee.value),
+                medicineCharges: parseFloat(medicineCharges.value)
+            };
+
+            console.log('Sending bill data:', billData);
+
+            const response = await fetch('/Bills/Create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(billData)
+            });
+
+            const result = await response.json();
+            showAlert(result.message, result.success);
+        } catch (error) {
+            showAlert('Network error: ' + error.message, false);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Create Bill';
+        }
+    });
+
+    // Populate modal data when bill button is clicked
+    modal.addEventListener('show.bs.modal', function(event) {
+        alertDiv.style.display = 'none';
+        const button = event.relatedTarget;
+        const appointmentId = button.getAttribute('data-appointment-id');
+        const patientName = button.getAttribute('data-patient-name');
+        const doctorName = button.getAttribute('data-doctor-name');
+
+        appointmentIdInput.value = appointmentId;
+        appointmentInfo.textContent = `#${appointmentId} - ${patientName} with Dr. ${doctorName}`;
+        consultationFee.value = '';
+        medicineCharges.value = '';
+        updateTotal();
+    });
+});
+</script>

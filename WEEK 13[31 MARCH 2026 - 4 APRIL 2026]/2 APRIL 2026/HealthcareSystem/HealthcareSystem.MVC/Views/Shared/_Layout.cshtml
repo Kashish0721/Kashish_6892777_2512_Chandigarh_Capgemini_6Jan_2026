@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Healthcare System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" />
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+@{
+    var role = Context.Session.GetString("UserRole");
+    var name = Context.Session.GetString("UserName");
+    var isLoggedIn = Context.Session.GetString("JwtToken") != null;
+}
+
+@if (isLoggedIn)
+{
+    <div class="d-flex flex-grow-1">
+        <!-- Sidebar -->
+        <nav class="sidebar d-flex flex-column p-3 bg-primary text-white" style="width:250px;min-height:100vh">
+            <div class="text-center mb-4">
+                <i class="bi bi-heart-pulse-fill fs-1 text-white"></i>
+                <h5 class="mt-2 mb-0 fw-bold">HealthCare</h5>
+                <small class="text-white-50">Management System</small>
+            </div>
+
+            <div class="mb-3 p-2 bg-white bg-opacity-10 rounded">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center fw-bold"
+                         style="width:36px;height:36px;font-size:14px">
+                        @(name?.Length > 0 ? name[0].ToString().ToUpper() : "U")
+                    </div>
+                    <div>
+                        <div class="fw-semibold" style="font-size:13px">@name</div>
+                        <span class="badge bg-white text-primary" style="font-size:10px">@role</span>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="nav flex-column gap-1 flex-grow-1">
+                <li class="nav-item">
+                    <a class="nav-link text-white sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
+                       href="/"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+                </li>
+
+                @if (role == "Admin" || role == "Doctor")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Patients" ? "active" : "")"
+                           href="/Patients"><i class="bi bi-people me-2"></i>Patients</a>
+                    </li>
+                }
+
+                <li class="nav-item">
+                    <a class="nav-link text-white sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Doctors" ? "active" : "")"
+                       href="/Doctors"><i class="bi bi-person-badge me-2"></i>Doctors</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-white sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Appointments" ? "active" : "")"
+                       href="/Appointments"><i class="bi bi-calendar-check me-2"></i>Appointments</a>
+                </li>
+
+                @if (role == "Patient" || role == "Admin")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Bills" ? "active" : "")"
+                           href="/Bills"><i class="bi bi-receipt me-2"></i>Bills</a>
+                    </li>
+                }
+
+                @if (role == "Patient")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white sidebar-link" href="/Appointments/Book">
+                            <i class="bi bi-plus-circle me-2"></i>Book Appointment</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white sidebar-link" href="/Prescriptions/My">
+                            <i class="bi bi-file-medical me-2"></i>My Prescriptions</a>
+                    </li>
+                }
+
+                @if (role == "Admin")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")"
+                           href="/Admin/Users"><i class="bi bi-shield-check me-2"></i>User Management</a>
+                    </li>
+                }
+            </ul>
+
+            <div class="mt-auto">
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-light w-100 btn-sm">
+                        <i class="bi bi-box-arrow-left me-2"></i>Logout
+                    </button>
+                </form>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="flex-grow-1 p-4 bg-light">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @RenderBody()
+        </main>
+    </div>
+}
+else
+{
+    @RenderBody()
+}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

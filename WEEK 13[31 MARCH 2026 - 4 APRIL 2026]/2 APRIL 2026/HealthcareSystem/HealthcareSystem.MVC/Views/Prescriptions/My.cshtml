@@ -1,0 +1,87 @@
+@model IEnumerable<HealthcareSystem.Models.DTOs.PrescriptionDto>
+@{
+    ViewData["Title"] = "My Prescriptions";
+    var list = Model?.ToList() ?? new();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0"><i class="bi bi-file-medical me-2 text-primary"></i>My Prescriptions</h3>
+    <span class="badge bg-primary fs-6">@list.Count total</span>
+</div>
+
+@if (!list.Any())
+{
+    <div class="card border-0 shadow-sm text-center py-5 text-muted">
+        <i class="bi bi-file-medical fs-1 d-block mb-3 opacity-25"></i>
+        <p>No prescriptions found</p>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var p in list)
+        {
+            <div class="col-md-6 col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="fw-bold mb-0">Prescription #@p.Id</h6>
+                                <small class="text-muted">Dr. @p.DoctorName</small>
+                            </div>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                    </div>
+                    <div class="card-body pt-3">
+                        <div class="d-flex align-items-center gap-2 mb-3 text-muted small">
+                            <i class="bi bi-calendar3"></i>
+                            <span>Issued: @p.IssuedDate.ToString("MMM dd, yyyy")</span>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(p.Diagnosis))
+                        {
+                            <div class="mb-3">
+                                <label class="text-muted small fw-semibold d-block">DIAGNOSIS</label>
+                                <p class="mb-0 small">@p.Diagnosis</p>
+                            </div>
+                        }
+
+                        @if (p.Medicines.Any())
+                        {
+                            <div class="mb-3">
+                                <label class="text-muted small fw-semibold d-block mb-2">MEDICINES</label>
+                                <div class="d-flex flex-column gap-2">
+                                    @foreach (var med in p.Medicines)
+                                    {
+                                        <div class="bg-light rounded p-2 small">
+                                            <span class="fw-semibold">@med.MedicineName</span>
+                                            @if (!string.IsNullOrEmpty(med.Dosage))
+                                            {
+                                                <span class="text-muted ms-1">@med.Dosage</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(med.Frequency))
+                                            {
+                                                <div class="text-muted">@med.Frequency</div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(med.Duration))
+                                            {
+                                                <div class="text-muted">Duration: @med.Duration</div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(p.Instructions))
+                        {
+                            <div class="alert alert-info py-2 small mb-0">
+                                <i class="bi bi-info-circle me-1"></i>@p.Instructions
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

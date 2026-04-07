@@ -1,0 +1,202 @@
+﻿@{
+    ViewData["Title"] = "SmartHospital - Modern Healthcare Management";
+}
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #0F2A3F 0%, #1A3A52 50%, #00A878 100%);
+        color: white;
+        padding: 4rem 2rem;
+        border-radius: 16px;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 40px rgba(0, 168, 120, 0.2);
+        animation: slideIn 0.5s ease;
+    }
+    
+    .hero-section h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        animation: fadeIn 0.8s ease;
+    }
+    
+    .hero-section p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+        animation: fadeIn 1s ease;
+    }
+    
+    .feature-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+    
+    .feature-card i {
+        font-size: 3rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+    
+    .feature-card h5 {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    
+    .feature-card p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin: 0;
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="hero-section text-center">
+    <h1>
+        <i class="bi bi-hospital-fill me-3"></i>SmartHospital
+    </h1>
+    <p>Modern Healthcare Management System</p>
+    <p class="lead mb-4">Streamline patient care, manage appointments, and improve healthcare delivery with our comprehensive platform.</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="/Account/Register" class="btn btn-light btn-lg fw-600">
+            <i class="bi bi-person-plus me-2"></i>Register as Patient
+        </a>
+        <a href="/Account/Login" class="btn btn-outline-light btn-lg fw-600">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+        </a>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="mb-5">
+    <h2 class="text-center mb-4 fw-bold">Key Features</h2>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="bi bi-calendar-check"></i>
+                <h5>Easy Appointments</h5>
+                <p>Book and manage medical appointments with just a few clicks</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="bi bi-prescription"></i>
+                <h5>Digital Prescriptions</h5>
+                <p>Access your prescriptions digitally and securely</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="bi bi-receipt"></i>
+                <h5>Bill Management</h5>
+                <p>View and manage your medical bills online</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="bi bi-shield-check"></i>
+                <h5>Secure & Private</h5>
+                <p>Your medical data is protected with enterprise-grade security</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="bi bi-people"></i>
+                <h5>Professional Team</h5>
+                <p>Connect with experienced doctors and healthcare professionals</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="bi bi-graph-up"></i>
+                <h5>Health Tracking</h5>
+                <p>Monitor your health records and appointment history</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Benefits Section -->
+<div class="card mt-5">
+    <div class="card-header" style="background: linear-gradient(135deg, var(--primary) 0%, #00D4A3 100%);">
+        <h5 class="mb-0" style="color: white;">
+            <i class="bi bi-stars me-2"></i>Why Choose SmartHospital?
+        </h5>
+    </div>
+    <div class="card-body p-4">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="d-flex gap-3">
+                    <div style="flex-shrink: 0;">
+                        <div class="d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(0, 168, 120, 0.1); border-radius: 8px; color: var(--primary);">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">24/7 Accessible</h6>
+                        <p class="text-muted small mb-0">Access your healthcare information anytime, anywhere</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-3">
+                    <div style="flex-shrink: 0;">
+                        <div class="d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(0, 168, 120, 0.1); border-radius: 8px; color: var(--primary);">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">User-Friendly Interface</h6>
+                        <p class="text-muted small mb-0">Intuitive design that's easy to navigate for all users</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-3">
+                    <div style="flex-shrink: 0;">
+                        <div class="d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(0, 168, 120, 0.1); border-radius: 8px; color: var(--primary);">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Fast & Reliable</h6>
+                        <p class="text-muted small mb-0">Consistent performance with 99.9% uptime guarantee</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-3">
+                    <div style="flex-shrink: 0;">
+                        <div class="d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(0, 168, 120, 0.1); border-radius: 8px; color: var(--primary);">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Expert Support</h6>
+                        <p class="text-muted small mb-0">Dedicated support team ready to help you</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="text-center mt-5">
+    <h3 class="fw-bold mb-3">Ready to Get Started?</h3>
+    <p class="text-muted mb-4">Join thousands of patients using SmartHospital for better healthcare management</p>
+    <a href="/Account/Register" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, var(--primary) 0%, #00D4A3 100%); border: none;">
+        <i class="bi bi-person-plus me-2"></i>Create Your Account Today
+    </a>
+</div>

@@ -19,7 +19,7 @@ const Auth = {
 };
 
 // ── API helpers ─────────────────────────────────────────────────────────────
-const API_BASE = window.API_BASE_URL || 'https://localhost:7000';
+const API_BASE = window.API_BASE_URL || 'https://localhost:5000';
 
 async function apiFetch(path, options = {}) {
     const token = Auth.getToken();
